@@ -26,7 +26,7 @@ let persons = [
     },
     {
         "name": "Clark Kent",
-        "number": "6543 655",
+        "number": "0400 654 655",
         "id": 4
     }
 ]
@@ -77,7 +77,7 @@ app.post('/api/persons/', (req, res) => {
     res.json(person)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
