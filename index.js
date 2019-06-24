@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 app.use(express.static('build'))
@@ -12,7 +13,9 @@ const morgan = require('morgan')
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :json'))
 morgan.token('json', (req,res) => JSON.stringify(req.body))
 
-let persons = [
+const Person = require('./models/person')
+
+const persons = [
     {
         "name": "Arto Hellas",
         "number": "432 432 432",
@@ -45,19 +48,23 @@ app.get('/info', (req, res) => {
   })
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({})
+    .then(ps => res.json(ps.map(p => p.toJSON())))
 })
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-    res.json(person)
+app.get('/api/persons/:id', (req, res, next) => {
+    Person.findById(req.params.id)
+      .then(p => res.json(p.toJSON))
+      .catch(error => next(error))
+    // const id = Number(req.params.id)
+    // const person = persons.find(p => p.id === id)
+    // res.json(person)
   })
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    persons = persons.filter(p => p.id !== id)
-    res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next) => {
+  Note.findByIdAndRemove(req.params.id)
+    .then(result => response.status(204).end())
+    .catch(error => next(error))
 })
 
 app.post('/api/persons/', (req, res) => {
@@ -72,16 +79,31 @@ app.post('/api/persons/', (req, res) => {
             error: `${body.name} already exists` 
           })        
     }
-    const person = {
+    const person = new Person({
         name: body.name,
         number: body.number,
-        id: Math.floor(Math.random()*10000)
-    }
-    persons = persons.concat(person)
-    res.json(person)
+//      id: Math.floor(Math.random()*10000)
+    })
+    person.save()
+      .then(saved => res.json(saved.toJSON()))
+      .catch(error => next(error))
 })
 
-const PORT = process.env.PORT || 3001
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+  next(error)
+}
+app.use(errorHandler)
+
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
