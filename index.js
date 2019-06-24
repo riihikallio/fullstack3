@@ -20,7 +20,6 @@ app.get('/', (req, res) => {
 })
 
 app.get('/info', (req, res, next) => {
-  let count = 0
   Person.find({})
     .then(p =>  {
       res.send(`<p>Phonebook has info for ${p.length} people</p>
@@ -36,9 +35,9 @@ app.get('/api/persons', (req, res, next) => {
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
-    Person.findById(req.params.id)
-      .then(p => res.json(p.toJSON()))
-      .catch(error => next(error))
+  Person.findById(req.params.id)
+    .then(p => res.json(p.toJSON()))
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
@@ -48,20 +47,20 @@ app.delete('/api/persons/:id', (req, res, next) => {
 })
 
 app.post('/api/persons/', (req, res, next) => {
-    const body = req.body
-    if (!(body.name && body.number)) {
-      return res.status(400).json({ 
-        error: 'name or number missing' 
-      })
-    }
-    const person = new Person({
-      name: body.name,
-      number: body.number,
-//    id: Math.floor(Math.random()*10000)
+  const body = req.body
+  if (!(body.name && body.number)) {
+    return res.status(400).json({ 
+      error: 'name or number missing' 
     })
-    person.save()
-      .then(saved => res.json(saved.toJSON()))
-      .catch(error => next(error))
+  }
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+    //    id: Math.floor(Math.random()*10000)
+  })
+  person.save()
+    .then(saved => res.json(saved.toJSON()))
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {

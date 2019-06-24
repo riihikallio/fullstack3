@@ -12,20 +12,20 @@ mongoose.connect(url, { useNewUrlParser: true })
     console.log('error connecting to MongoDB:', error.message)
   })
 
-  const personSchema = new mongoose.Schema({
-    name: {
-      type: String,
-      unique: true,
-      required: true, 
-      minlength: 3
-    },
-    number: {
-      type: String,
-      required: true,
-      minlength: 8
-    },
-    id: String
-  })
+const personSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    unique: true,
+    required: true, 
+    minlength: 3
+  },
+  number: {
+    type: String,
+    required: true,
+    minlength: 8
+  },
+  id: String
+})
 
 personSchema.set('toJSON', {
   transform: (document, returnedObject) => {
